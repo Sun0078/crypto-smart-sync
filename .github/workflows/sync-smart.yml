@@ -1,0 +1,64 @@
+name: Sync Smart Wallets Daily
+
+on:
+  schedule:
+    # 每天 UTC 04:00 (北京时间中午 12:00) 自动执行
+    - cron: '0 4 * * *'
+  workflow_dispatch: # 支持在 GitHub 控制台手动一键点击执行
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch from GMGN and Push to Worker
+        env:
+          WORKER_IMPORT_URL: "https://arc-master-radar.ldmhx7758521.workers.dev/import-smart"
+        run: |
+          node -e '
+          const chains = ["sol", "bsc", "base"];
+          const apiKey = "gmgn_ced5d8c6532c29d0c4b6094be8775275";
+          
+          (async () => {
+            let aggregated = [];
+            for (const c of chains) {
+              const url = `https://gmgn.ai/defi/quotation/v1/rank/${c}/wallets/30d?orderby=pnl&limit=30`;
+              try {
+                const res = await fetch(url, {
+                  headers: {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124.0.0.0 Safari/537.36",
+                    "Accept": "application/json",
+                    "X-APIKEY": apiKey
+                  }
+                });
+                if (!res.ok) {
+                  console.log(`[${c}] HTTP ` + res.status);
+                  continue;
+                }
+                const data = await res.json();
+                const list = data?.data?.rank || data?.rank || [];
+                for (const w of list) {
+                  aggregated.push({ ...w, chain: c.toUpperCase() });
+                }
+                console.log(`[${c}] 成功抓取: ` + list.length + " 个作手");
+              } catch (e) {
+                console.log(`[${c}] 请求异常: ` + e.message);
+              }
+            }
+
+            if (aggregated.length === 0) {
+              console.error("所有公链抓取均为空，终止回传");
+              process.exit(1);
+            }
+
+            // 推送到 Cloudflare Worker
+            const targetUrl = process.env.WORKER_IMPORT_URL;
+            const pushRes = await fetch(targetUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(aggregated)
+            });
+
+            const resultText = await pushRes.text();
+            console.log("Worker 接收响应:", resultText);
+          })();
+          '
