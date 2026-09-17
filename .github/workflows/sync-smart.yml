@@ -2,7 +2,7 @@ name: Sync Smart Wallets Daily
 
 on:
   schedule:
-    - cron: '0 4 * * *' # 每天北京时间中午 12:00
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 permissions:
@@ -12,39 +12,41 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Install Playwright Browser
+      - name: Install Playwright
         run: |
           npm install playwright
           npx playwright install chromium --with-deps
 
-      - name: Run Crawler and Save to Repo
+      - name: Run Crawler
         run: |
           node -e '
           const { chromium } = require("playwright");
           const fs = require("fs");
 
           (async () => {
-            console.log("正在启动无头 Chrome 浏览器穿透 5 秒盾...");
+            console.log("启动无头 Chrome 穿透 5 秒盾...");
             const browser = await chromium.launch({ headless: true });
             const context = await browser.newContext({
               userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
             });
             const page = await context.newPage();
 
-            console.log("打开 GMGN 首页激活安全通行证...");
+            console.log("访问 GMGN 获取通行凭证...");
             try {
               await page.goto("https://gmgn.ai/?chain=sol", { waitUntil: "domcontentloaded", timeout: 30000 });
               await page.waitForTimeout(6000);
             } catch (e) {
-              console.log("主页载入提示:", e.message);
+              console.log("主页提示:", e.message);
             }
 
             const chains = ["sol", "bsc", "base"];
@@ -91,18 +93,16 @@ jobs:
               aggregated.sort((a, b) => b.pnl30d - a.pnl30d);
               const top50 = aggregated.slice(0, 50);
               fs.writeFileSync("smart_wallets.json", JSON.stringify(top50, null, 2));
-              console.log(`成功将 Top ${top50.length} 作手落盘至 smart_wallets.json`);
-            } else {
-              console.log("抓取为空，保持原文件不变");
+              console.log(`成功将 Top ${top50.length} 作手保存至 smart_wallets.json`);
             }
           })();
           '
 
-     - name: Commit and Push to Repository
+      - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add smart_wallets.json
-          git commit -m "chore: auto sync top 50 smart wallets [skip ci]" || echo "无变动，跳过提交"
+          git commit -m "chore: auto sync smart wallets [skip ci]" || echo "无变动"
           git pull --rebase origin main
           git push origin main
