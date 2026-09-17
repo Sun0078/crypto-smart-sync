@@ -5,30 +5,33 @@ on:
     - cron: '0 4 * * *' # 每天北京时间中午 12:00
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install Playwright Browser
         run: |
           npm install playwright
           npx playwright install chromium --with-deps
 
-      - name: Run Real Browser Crawler
-        env:
-          # 务必把下面这行替换为你的真实 Worker 域名（保留 /import-smart）：
-          WORKER_URL: "https://arc-master-radar.ldmhx7758521.workers.dev/import-smart"
+      - name: Run Crawler and Save to Repo
         run: |
           node -e '
           const { chromium } = require("playwright");
+          const fs = require("fs");
 
           (async () => {
-            const workerUrl = process.env.WORKER_URL;
             console.log("正在启动无头 Chrome 浏览器穿透 5 秒盾...");
             const browser = await chromium.launch({ headless: true });
             const context = await browser.newContext({
@@ -36,11 +39,10 @@ jobs:
             });
             const page = await context.newPage();
 
-            // 1. 访问主站让浏览器自主跑通 Cloudflare 验证
             console.log("打开 GMGN 首页激活安全通行证...");
             try {
               await page.goto("https://gmgn.ai/?chain=sol", { waitUntil: "domcontentloaded", timeout: 30000 });
-              await page.waitForTimeout(6000); // 等待盾自动通过
+              await page.waitForTimeout(6000);
             } catch (e) {
               console.log("主页载入提示:", e.message);
             }
@@ -49,7 +51,6 @@ jobs:
             const apiKey = "gmgn_ced5d8c6532c29d0c4b6094be8775275";
             let aggregated = [];
 
-            // 2. 利用已获得通行凭证的真实浏览器上下文请求数据
             for (const c of chains) {
               const targetUrl = `https://gmgn.ai/defi/quotation/v1/rank/${c}/wallets/30d?orderby=pnl&limit=30`;
               try {
@@ -62,9 +63,23 @@ jobs:
 
                 const list = result?.data?.rank || result?.rank || [];
                 for (const w of list) {
-                  aggregated.push({ ...w, chain: c.toUpperCase() });
+                  const rawRate = w.winRate ?? w.win_rate ?? w.winrate ?? 0.6;
+                  const rateNum = Number(String(rawRate).replace("%", ""));
+                  const rate = rateNum > 1 ? rateNum / 100 : rateNum;
+                  const addr = (w.wallet_address || w.address || "").toLowerCase();
+
+                  if (addr) {
+                    aggregated.push({
+                      chain: c.toUpperCase(),
+                      address: addr,
+                      alias: w.twitter_username ? `@${w.twitter_username}` : `${addr.slice(0, 4)}...${addr.slice(-4)}`,
+                      pnl30d: Math.round(Number(w.pnl ?? w.pnl_30d ?? 0)),
+                      winRate: `${Math.round(rate * 100)}%`,
+                      profitUsd: Math.round(Number(w.realized_profit ?? 0))
+                    });
+                  }
                 }
-                console.log(`[${c}] 成功穿透并拉取: ${list.length} 个优质作手`);
+                console.log(`[${c}] 成功抓取: ${list.length} 个作手`);
               } catch (e) {
                 console.log(`[${c}] 异常: ${e.message}`);
               }
@@ -72,17 +87,21 @@ jobs:
 
             await browser.close();
 
-            // 3. 将聚合的 Top 50 结果推送写入 Cloudflare Worker KV
             if (aggregated.length > 0) {
-              console.log(`准备将 ${aggregated.length} 个最新作手推回 Worker...`);
-              const pushRes = await fetch(workerUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(aggregated)
-              });
-              console.log("Worker 接收响应:", await pushRes.text());
+              aggregated.sort((a, b) => b.pnl30d - a.pnl30d);
+              const top50 = aggregated.slice(0, 50);
+              fs.writeFileSync("smart_wallets.json", JSON.stringify(top50, null, 2));
+              console.log(`成功将 Top ${top50.length} 作手落盘至 smart_wallets.json`);
             } else {
-              console.log("本次抓取受限，Worker 自动保持内置种子库运行。");
+              console.log("抓取为空，保持原文件不变");
             }
           })();
           '
+
+      - name: Commit and Push to Repository
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add smart_wallets.json
+          git commit -m "chore: auto sync top 50 smart wallets [skip ci]" || echo "无变动，跳过提交"
+          git push
