@@ -1,6 +1,14 @@
 [
   {
     "chain": "BASE",
+    "address": "0xb034db23e89d14caceeb4b2c1aef0e0b99974a8a",
+    "alias": "@0xFries7683",
+    "pnl30d": 9,
+    "winRate": "60%",
+    "profitUsd": 0
+  },
+  {
+    "chain": "BASE",
     "address": "0x077b9981bc8a2ca417cea41861111da63266988b",
     "alias": "@clukz",
     "pnl30d": 2,
@@ -153,16 +161,16 @@
   },
   {
     "chain": "SOL",
-    "address": "bi4rd5fh5byen8scz7wevxnzynmkhdabcvewdpfxydlt",
-    "alias": "@theonomix",
+    "address": "boevpctnmrtb7xhaj99gnrghp88hojtpvj76bwx1guwq",
+    "alias": "boev...guwq",
     "pnl30d": 0,
     "winRate": "60%",
     "profitUsd": 0
   },
   {
     "chain": "SOL",
-    "address": "boevpctnmrtb7xhaj99gnrghp88hojtpvj76bwx1guwq",
-    "alias": "boev...guwq",
+    "address": "bi4rd5fh5byen8scz7wevxnzynmkhdabcvewdpfxydlt",
+    "alias": "@theonomix",
     "pnl30d": 0,
     "winRate": "60%",
     "profitUsd": 0
@@ -233,14 +241,6 @@
   },
   {
     "chain": "SOL",
-    "address": "215nhcahjqqggwpqsjq7zr26etbjjtvdw74nlzwegqjp",
-    "alias": "@0GAntD",
-    "pnl30d": 0,
-    "winRate": "60%",
-    "profitUsd": 0
-  },
-  {
-    "chain": "SOL",
     "address": "866srsmfwkseratzdclapbxh3nuqjkn7zq1xxmqixoz1",
     "alias": "866s...xoz1",
     "pnl30d": 0,
@@ -259,6 +259,14 @@
     "chain": "SOL",
     "address": "99i9uva7q56by22ajkkuftztgtep5yctvgsrg9j4pdyq",
     "alias": "@TheRealZrool",
+    "pnl30d": 0,
+    "winRate": "60%",
+    "profitUsd": 0
+  },
+  {
+    "chain": "SOL",
+    "address": "215nhcahjqqggwpqsjq7zr26etbjjtvdw74nlzwegqjp",
+    "alias": "@0GAntD",
     "pnl30d": 0,
     "winRate": "60%",
     "profitUsd": 0
@@ -289,32 +297,16 @@
   },
   {
     "chain": "SOL",
+    "address": "twamwhjs9pqcav2drmjyvyfmfrrhyxeeac2at7jd9lu",
+    "alias": "twam...d9lu",
+    "pnl30d": 0,
+    "winRate": "60%",
+    "profitUsd": 0
+  },
+  {
+    "chain": "SOL",
     "address": "4lbebnefj5e8bjbl1xdvoyqqhepztk14pwsrgoakape2",
     "alias": "@JohnWankley",
-    "pnl30d": 0,
-    "winRate": "60%",
-    "profitUsd": 0
-  },
-  {
-    "chain": "SOL",
-    "address": "suqh5shtr8hyj7q8scbimulpkppa557prmg47xchqfk",
-    "alias": "@Cupseyy",
-    "pnl30d": 0,
-    "winRate": "60%",
-    "profitUsd": 0
-  },
-  {
-    "chain": "SOL",
-    "address": "4g73es2nxr9r8rzaxc119m44sbclsr2zagtex5dsag8r",
-    "alias": "4g73...ag8r",
-    "pnl30d": 0,
-    "winRate": "60%",
-    "profitUsd": 0
-  },
-  {
-    "chain": "SOL",
-    "address": "djqwtiowtjmavau4vhcafgpis3nnkd5r5agzgbqedhk2",
-    "alias": "djqw...dhk2",
     "pnl30d": 0,
     "winRate": "60%",
     "profitUsd": 0
@@ -329,8 +321,8 @@
   },
   {
     "chain": "SOL",
-    "address": "67nwfi9hgwqhxgoovt2jglu67uxfomlwqawncjxxzu6u",
-    "alias": "@0xLake",
+    "address": "djqwtiowtjmavau4vhcafgpis3nnkd5r5agzgbqedhk2",
+    "alias": "djqw...dhk2",
     "pnl30d": 0,
     "winRate": "60%",
     "profitUsd": 0
@@ -339,6 +331,22 @@
     "chain": "SOL",
     "address": "bqvz7fq1wsqmstmy3umdpepptm1sdcbcx9sp7o6kprmb",
     "alias": "@Limfork",
+    "pnl30d": 0,
+    "winRate": "60%",
+    "profitUsd": 0
+  },
+  {
+    "chain": "SOL",
+    "address": "suqh5shtr8hyj7q8scbimulpkppa557prmg47xchqfk",
+    "alias": "@Cupseyy",
+    "pnl30d": 0,
+    "winRate": "60%",
+    "profitUsd": 0
+  },
+  {
+    "chain": "SOL",
+    "address": "67nwfi9hgwqhxgoovt2jglu67uxfomlwqawncjxxzu6u",
+    "alias": "@0xLake",
     "pnl30d": 0,
     "winRate": "60%",
     "profitUsd": 0
@@ -379,14 +387,6 @@
     "chain": "BSC",
     "address": "0x077b9981bc8a2ca417cea41861111da63266988b",
     "alias": "@clukz",
-    "pnl30d": 0,
-    "winRate": "60%",
-    "profitUsd": 0
-  },
-  {
-    "chain": "BSC",
-    "address": "0x2ce9d43d1cba6ae31d7f07bfe0098dfa2d833373",
-    "alias": "@rob02643673_rob",
     "pnl30d": 0,
     "winRate": "60%",
     "profitUsd": 0
